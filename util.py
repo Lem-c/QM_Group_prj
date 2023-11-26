@@ -32,7 +32,7 @@ def simple_linear_regression(df_, col_X: str, col_y: str, is_plot=True):
     df_X = df_[[col_X]]
     df_y = df_[col_y].to_numpy()
 
-    X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.3, random_state=2023)
+    X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.3, train_size=0.7, random_state=2023)
 
     model = linear_model.LinearRegression()
     model.fit(X_train, y_train)
