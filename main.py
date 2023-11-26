@@ -20,4 +20,4 @@ if __name__ == "__main__":
     # Multi linear
     crime_df.join_multi_row(selected_crimes, 202001, '2020-21')
     print(crime_df.reg_df_.columns)
-    util.multi_linear_regression(crime_df.reg_df_, selected_crimes, '2020-21', False)
+    util.multi_linear_regression(crime_df.reg_df_, selected_crimes, '2020-21')
