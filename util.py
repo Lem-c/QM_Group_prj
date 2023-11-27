@@ -95,6 +95,6 @@ def multi_linear_regression(df, crime_list: list, col_y: str):
     y = cleaned_data[col_y]
 
     # Splitting the dataset into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, train_size=0.9, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, train_size=0.7, random_state=42)
 
-    y_prediction = linear_predict_model(X_train, X_test, y_train, y_test)
+    linear_predict_model(X_train, X_test, y_train, y_test)

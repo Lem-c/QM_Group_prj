@@ -12,7 +12,7 @@ class AllDataFrameInOne:
     def filter_crime_minor(self, tar_col: str):
         return self._borough_crime_df_[self._borough_crime_df_['MinorText'] == tar_col]
 
-    def join_tables(self, crime_type: str, crime_year: int, rent_year: str):
+    def join_minor_tables(self, crime_type: str, crime_year: int, rent_year: str):
         """
         @TODO: Comments on the way...
         :param crime_type: The specific type of crime in 'MinorText' column
@@ -35,16 +35,28 @@ class AllDataFrameInOne:
         self.reg_df_ = joined_data[['Area', 'year_total', rent_year]]
         return self.reg_df_
 
-    def join_multi_row(self, selected_crime: list, crime_year: int, rent_year: str):
+    def _sum_crime_table_by_Major(self):
+        # Grouping the data by 'MajorText' and summing up all the monthly crime counts
+        self._borough_crime_df_ = self._borough_crime_df_.groupby(['MajorText', 'LookUp_BoroughName']).sum()
+        # Resetting the index to have 'MajorText' as a column
+        self._borough_crime_df_.reset_index(inplace=True)
+
+    def join_multi_row(self, selected_crime: list, crime_year: int, rent_year: str, isMinor=True):
         """
         @TODO: Comments on the way...
         :param selected_crime: It should be a list saves more than one crime type
                                 Like the 'selected_crimes' in main
-        :param crime_year: Used to sum a years all cases
+        :param crime_year: Used to sum a year's all cases
         :param rent_year: The data in this year
-        :return: merged dataframe used for multi linear regression
+        :param isMinor: Whether the processing targets to the minor column
+        :return: Merged dataframe used for multi linear regression
         """
-        filtered_crime_data = self._borough_crime_df_[self._borough_crime_df_['MinorText'].isin(selected_crime)]
+        crime_text = 'MinorText'
+        if not isMinor:
+            crime_text = 'MajorText'
+            self._sum_crime_table_by_Major()
+
+        filtered_crime_data = self._borough_crime_df_[self._borough_crime_df_[crime_text].isin(selected_crime)]
 
         if filtered_crime_data is None:
             raise Exception("Fail to find target crime type")
@@ -52,11 +64,11 @@ class AllDataFrameInOne:
         # Columns for the year 2020
         columns = [str(year_month) for year_month in range(crime_year, crime_year + 12)]
         # Group by borough and sum the monthly data for the 'rent_year'
-        filtered_crime_data = filtered_crime_data.groupby(['LookUp_BoroughName', 'MinorText'])[columns].sum()
+        filtered_crime_data = filtered_crime_data.groupby(['LookUp_BoroughName', crime_text])[columns].sum()
         filtered_crime_data['year_total'] = filtered_crime_data.sum(axis=1)
         # Pivot the crime data count
         filtered_crime_data = filtered_crime_data.reset_index().pivot(index='LookUp_BoroughName',
-                                                                      columns='MinorText',
+                                                                      columns=crime_text,
                                                                       values='year_total')
 
         rent_data = self._rent_df_[['Area', rent_year]].dropna()
