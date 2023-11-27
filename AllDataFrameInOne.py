@@ -1,11 +1,19 @@
 import pandas as pd
 import util
 
+# pandas print option
+pd.set_option('display.max_columns', 1000)
+pd.set_option('display.width', 1000)
+pd.set_option('display.max_colwidth', 1000)
+
 
 class AllDataFrameInOne:
     def __init__(self, rentDataFile: str, crimeDataFile: str):
         self._rent_df_ = util.format_read_csv(rentDataFile)
         self._borough_crime_df_ = util.format_read_csv(crimeDataFile)
+
+        # The df used for data visualization
+        self.borough_sum_df_ = self.join_all_crime()
         # The df used for linear regression
         self.reg_df_ = None
 
@@ -80,6 +88,27 @@ class AllDataFrameInOne:
 
         self.reg_df_ = merged_data
         return self.reg_df_
+
+    def join_all_crime(self):
+        """
+        Add all crimes together for analysis
+        :return: new table saves all borough names as column name
+        """
+
+        # Melting the dataframe to transform the years columns
+        df_melted = self._borough_crime_df_.melt(id_vars=["MajorText", "MinorText", "LookUp_BoroughName"],
+                                                 var_name="YearMonth",
+                                                 value_name="CrimeCount")
+
+        # Pivoting the dataframe to make 'LookUp_BoroughName' as column headers
+        df_pivoted = df_melted.pivot_table(index=["MajorText", "MinorText", "YearMonth"],
+                                           columns="LookUp_BoroughName",
+                                           values="CrimeCount").reset_index()
+
+        df_pivoted = util.sum_table_by_year(df_pivoted)
+        df_final = df_pivoted.drop(columns=["MajorText", "MinorText"])
+
+        return df_final
 
     def print_column_names(self):
         print(self._rent_df_.columns)

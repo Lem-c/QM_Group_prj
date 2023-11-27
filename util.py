@@ -1,5 +1,4 @@
 # This is assist methods file
-import operator
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -103,6 +102,37 @@ def multi_linear_regression(df, crime_list: list, col_y: str):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, train_size=0.7, random_state=42)
 
     linear_predict_model(X_train, X_test, y_train, y_test)
+
+
+def sum_table_by_year(df_, col_year="YearMonth"):
+    """
+    Can only be used after pivoted by year
+    """
+
+    # Grouping the data by 'LookUp_BoroughName' and summing up all the monthly crime counts
+    df_ = df_.groupby([col_year]).sum()
+    # Resetting the index to have 'MajorText' as a column
+    df_.reset_index(inplace=True)
+    return df_
+
+
+def plot_crime_trend(df_, col_year='YearMonth'):
+    # Extracting YearMonth for the x-axis
+    x = df_[col_year]
+    print(df_.columns)
+
+    # Plotting line graphs for each borough
+    plt.figure(figsize=(20, 8))
+    for column in df_.columns[1:]:  # Skipping the first few columns to get only boroughs
+        plt.plot(x, df_[column], label=column)
+
+    # Adding labels and title
+    plt.xlabel(col_year)
+    plt.ylabel('Values')
+    plt.title('Total number of crimes by Borough Over Time')
+    plt.xticks(rotation=45)  # Rotating x-axis labels for better readability
+    plt.legend()
+    plt.show()
 
 
 def polynomial_regression(df, ):
