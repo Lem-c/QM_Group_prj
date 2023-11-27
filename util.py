@@ -1,10 +1,12 @@
 # This is assist methods file
+import operator
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn import linear_model
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
@@ -38,63 +40,70 @@ def linear_predict_model(X_train, X_test, y_train, y_test):
     intercept = model.intercept_
 
     print(f'The MSE is: {mse:.3f} and R-squared is: {r2:.3f}')
-    print(f'The coefficients is(are): {coefficients} and intercept is: {intercept}')
+    print(f'The coefficient(s) is(are): {coefficients} and intercept is: {intercept}')
     return y_prediction
 
 
 def plot_reg(X_test, y_test, y_prediction):
     # Plot outputs with scatter and line
-    plt.scatter(X_test, y_test, color="black")
-    plt.plot(X_test, y_prediction, color="blue", linewidth=2)
-
-    plt.xticks(())
-    plt.yticks(())
+    plt.scatter(X_test, y_test, s=10, label="Original Data", color="black")
+    plt.plot(X_test, y_prediction, color="m")
+    plt.xlabel("Independent variable (X)")
+    plt.ylabel("Dependent variable (Y)")
 
     plt.show()
 
 
-def new_plot(X_test, y_test, y_prediction, R_square):
-    plt.style.use('default')
-    plt.style.use('ggplot')
-
-    fig, ax = plt.subplots(figsize=(8, 4))
-
-    ax.plot(X_test, y_prediction, color='k', label='Regression model')
-    ax.scatter(X_test, y_test, edgecolor='k', facecolor='grey', alpha=0.7, label='Sample data')
-    ax.set_ylabel('Gas production (Mcf/day)', fontsize=14)
-    ax.set_xlabel('Porosity (%)', fontsize=14)
-    ax.text(0.8, 0.1, 'aegis4048.github.io', fontsize=13, ha='center', va='center',
-            transform=ax.transAxes, color='grey', alpha=0.5)
-    ax.legend(facecolor='white', fontsize=11)
-    ax.set_title('$R^2= %.2f$' % R_square, fontsize=18)
-
-    fig.tight_layout()
-
-
-def simple_linear_regression(df_, col_X: str, col_y: str, is_plot=True):
+def simple_linear_regression(df_, col_X: str, col_y: str, isPolynomial=False, polynomialDegree=2, is_plot=True):
     if len(col_X) < 2 or len(col_y) < 1:
         print(col_X, col_y)
         raise Exception("Can't handle null column name to a dataset")
 
-    df_X = df_[[col_X]]
+    df_X = df_[[col_X]].to_numpy()
     df_y = df_[col_y].to_numpy()
 
     X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.3, train_size=0.7, random_state=2023)
 
+    if isPolynomial:
+        # Reshaping data for the model
+        df_y = df_y[:, np.newaxis]
+        # Transforming the data to include another axis
+        polynomial_features = PolynomialFeatures(degree=polynomialDegree)
+        X_poly = polynomial_features.fit_transform(df_X)
+        # Not split the dataset
+        X_train = X_poly
+        X_test = X_poly
+        y_train = df_y
+        y_test = df_y
+
     y_prediction = linear_predict_model(X_train, X_test, y_train, y_test)
 
-    if is_plot:
+    if is_plot and not isPolynomial:
         plot_reg(X_test, y_test, y_prediction)
+    else:
+        # Combine X and Y into a single array for sorting
+        combined = np.column_stack((df_X, y_prediction))
+        # Sort the array by the first column (X)
+        sorted_combined = combined[np.argsort(combined[:, 0])]
+        # Extract the sorted X and Y values
+        X_sorted = sorted_combined[:, 0]
+        Y_sorted = sorted_combined[:, 1]
+        plot_reg(X_sorted, df_y, Y_sorted)
 
 
 def multi_linear_regression(df, crime_list: list, col_y: str):
+    print("----Multi-Linear-Regression----")
     cleaned_data = df.dropna()
 
     # Defining the independent X and dependent y variables
-    X = cleaned_data[crime_list]
-    y = cleaned_data[col_y]
+    X = cleaned_data[crime_list].to_numpy()
+    y = cleaned_data[col_y].to_numpy()
 
     # Splitting the dataset into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, train_size=0.7, random_state=42)
 
     linear_predict_model(X_train, X_test, y_train, y_test)
+
+
+def polynomial_regression(df, ):
+    return
