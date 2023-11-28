@@ -115,8 +115,6 @@ class AllDataFrameInOne:
         :param val_col_name: New column name after melting and indexing
         :return: new table saves all borough names as column name
         """
-        if self.borough_sum_df_ is None:
-            raise Exception("Assign value to dataframe first")
 
         current_columns = columns_str
 

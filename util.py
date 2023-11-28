@@ -117,9 +117,11 @@ def sum_table_by_year(df_, col_year="YearMonth"):
 
 
 def plot_crime_trend(df_, col_year='YearMonth'):
+    if df_ is None:
+        raise Exception("Null object find: 'df_'")
+
     # Extracting YearMonth for the x-axis
     x = df_[col_year]
-    print(df_.columns)
 
     # Plotting line graphs for each borough
     plt.figure(figsize=(15, 6))
@@ -135,5 +137,15 @@ def plot_crime_trend(df_, col_year='YearMonth'):
     plt.show()
 
 
-def polynomial_regression(df, ):
-    return
+def plot_bar_chart(df_, borough: str, col_year='YearMonth'):
+    if df_ is None:
+        raise Exception("Null object find: 'df_'")
+
+    # Extracting YearMonth for the x-axis
+    x = df_[col_year]
+
+    plt.bar(x, df_[borough])
+    plt.xlabel(col_year)
+    plt.ylabel('Values')
+    plt.xticks(rotation=45)  # Rotating x-axis labels for better readability
+    plt.show()

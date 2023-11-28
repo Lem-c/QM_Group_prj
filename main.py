@@ -13,11 +13,14 @@ selected_major_crimes = ['Robbery', 'Possession of Weapons', 'Theft', 'Sexual Of
 
 if __name__ == "__main__":
     crime_df = myDF.AllDataFrameInOne(rent_data_url, crime_data_url)
-    # # plot the total crime trend figure
-    # crime_df.join_all_crime(["MajorText", "MinorText", "LookUp_BoroughName"],
-    #                         "LookUp_BoroughName",
-    #                         "CrimeCount")
-    # util.plot_crime_trend(crime_df.borough_sum_df_)
+    # plot the total crime trend figure
+    crime_df.join_all_text(["MajorText", "MinorText", "LookUp_BoroughName"],
+                           "LookUp_BoroughName",
+                           "CrimeCount")
+    # plot all borough line graph
+    util.plot_crime_trend(crime_df.borough_sum_df_)
+    # plot a borough cases in each month
+    util.plot_bar_chart(crime_df.borough_sum_df_, "Barnet")
 
     # Simple linear
     crime_df.join_minor_tables('Possession of Firearms Offences', 202001, '2020-21')
