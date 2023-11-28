@@ -14,6 +14,9 @@ selected_major_crimes = ['Robbery', 'Possession of Weapons', 'Theft', 'Sexual Of
 if __name__ == "__main__":
     crime_df = myDF.AllDataFrameInOne(rent_data_url, crime_data_url)
     # # plot the total crime trend figure
+    # crime_df.join_all_crime(["MajorText", "MinorText", "LookUp_BoroughName"],
+    #                         "LookUp_BoroughName",
+    #                         "CrimeCount")
     # util.plot_crime_trend(crime_df.borough_sum_df_)
 
     # Simple linear
@@ -21,6 +24,6 @@ if __name__ == "__main__":
     util.simple_linear_regression(crime_df.reg_df_, 'year_total', '2020-21', isPolynomial=True, polynomialDegree=2)
 
     # Multi linear
-    crime_df.join_multi_row(selected_major_crimes, 202001, '2020-21', isMinor=False)
+    crime_df.join_multi_row(selected_major_crimes, 202001, '2020-21', text_column='MajorText')
     # crime_df.print_column_names()
     util.multi_linear_regression(crime_df.reg_df_, selected_major_crimes, '2020-21')

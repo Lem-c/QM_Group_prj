@@ -122,7 +122,7 @@ def plot_crime_trend(df_, col_year='YearMonth'):
     print(df_.columns)
 
     # Plotting line graphs for each borough
-    plt.figure(figsize=(20, 8))
+    plt.figure(figsize=(15, 6))
     for column in df_.columns[1:]:  # Skipping the first few columns to get only boroughs
         plt.plot(x, df_[column], label=column)
 
