@@ -47,8 +47,8 @@ def plot_reg(X_test, y_test, y_prediction):
     # Plot outputs with scatter and line
     plt.scatter(X_test, y_test, s=10, label="Original Data", color="black")
     plt.plot(X_test, y_prediction, color="m")
-    plt.xlabel("Independent variable (X)")
-    plt.ylabel("Dependent variable (Y)")
+    plt.xlabel("Independent variable (Crime)")
+    plt.ylabel("Dependent variable (Rent)")
 
     plt.show()
 
