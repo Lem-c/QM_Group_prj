@@ -13,21 +13,25 @@ selected_major_crimes = ['Robbery', 'Possession of Weapons', 'Theft', 'Sexual Of
 
 if __name__ == "__main__":
     crime_df = myDF.AllDataFrameInOne(rent_data_url, crime_data_url)
+    crime_df.print_column_names()
     # plot the total crime trend figure
     crime_df.join_all_text(["MajorText", "MinorText", "LookUp_BoroughName"],
                            "LookUp_BoroughName",
                            "CrimeCount")
-    crime_df.join_all_year()
+
+    crime_df.join_all_together(is_change=True)
+    # plot each borough by year
     crime_df.plot_stack_sum('Year', 'Values')
-    # # plot all borough line graph
-    # util.plot_crime_trend(crime_df.borough_sum_df_)
-    # # plot a borough cases in each month
-    # util.plot_bar_chart(crime_df.borough_sum_df_, "Barnet")
-    #
-    # # Simple linear
-    # crime_df.join_minor_tables('Possession of Firearms Offences', 202001, ['2020-21', '2021-22'])
-    # util.simple_linear_regression(crime_df.reg_df_, 'year_total', '2020-21', isPolynomial=True, polynomialDegree=1)
-    #
+
+    # plot all borough line graph
+    util.plot_crime_trend(crime_df.borough_sum_df_)
+    # plot a borough cases in each month
+    util.plot_bar_chart(crime_df.borough_sum_df_, "Barnet")
+
+    # Simple linear
+    crime_df.join_minor_tables('Burglary', 202001, ['2020-21'], minor_major='MajorText')
+    util.simple_linear_regression(crime_df.reg_df_, 'year_total', '2020-21', isPolynomial=True, polynomialDegree=1)
+
     # # Multi linear
     # crime_df.join_multi_row(selected_major_crimes, 202001, '2020-21', text_column='MajorText')
     # # crime_df.print_column_names()

@@ -26,6 +26,7 @@ class AllDataFrameInOne:
         return self._left_independent_df_[self._left_independent_df_[main_text] == tar_col]
 
     def join_minor_tables(self, crime_type: str, crime_year: int, rent_year: list,
+                          minor_major='MinorText',
                           left_merge_column='LookUp_BoroughName',
                           right_merge_column='Area'):
         """
@@ -33,11 +34,12 @@ class AllDataFrameInOne:
         :param crime_type: The specific type of crime in 'MinorText' column
         :param crime_year: The first year sum from
         :param rent_year: In type of '20XX-XX'
+        :param minor_major: MinorText / MajorText
         :param left_merge_column: pd.merge(..., left_on=? | keep after merge for indexing
         :param right_merge_column: pd.merge(..., right_on=?
         :return: A left joint dataset contains borough name, crime data sum in a year and rent year
         """
-        filtered_crime_df = self.filter_case(crime_type)
+        filtered_crime_df = self.filter_case(crime_type, minor_major)
         columns = [str(year_month) for year_month in range(crime_year, crime_year + 12)]
         filtered_crime_df['year_total'] = filtered_crime_df[columns].sum(axis=1)
         filtered_crime_df = filtered_crime_df.iloc[:, :3].join(filtered_crime_df['year_total'])
@@ -143,16 +145,15 @@ class AllDataFrameInOne:
         self.borough_sum_df_ = df_final
         return df_final
 
-    def join_all_year(self, is_change=True):
+    def join_all_together(self, is_change=True):
         """
         This should only be applied after self.join_all_text(...)
         col_year="YearMonth"
         """
 
         borough_year_df = self.borough_sum_df_
-        borough_year_df['Year'] = borough_year_df['YearMonth'].astype(int) // 100
-        borough_year_df = borough_year_df.groupby('Year').sum()
-        borough_year_df = borough_year_df.drop(columns=['YearMonth'])
+        borough_year_df['YearMonth'] = self.borough_sum_df_['YearMonth'].astype(int) // 100
+        borough_year_df = borough_year_df.groupby('YearMonth').sum().reset_index()
 
         if is_change:
             self.borough_sum_df_ = borough_year_df
