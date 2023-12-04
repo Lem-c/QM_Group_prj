@@ -25,7 +25,7 @@ class AllDataFrameInOne:
         """
         return self._left_independent_df_[self._left_independent_df_[main_text] == tar_col]
 
-    def join_minor_tables(self, crime_type: str, crime_year: int, rent_year: str,
+    def join_minor_tables(self, crime_type: str, crime_year: int, rent_year: list,
                           left_merge_column='LookUp_BoroughName',
                           right_merge_column='Area'):
         """
@@ -49,7 +49,12 @@ class AllDataFrameInOne:
         # Handle the NA data and remove them
         joined_data.replace('..', pd.NA, inplace=True)
         joined_data.dropna(inplace=True)
-        self.reg_df_ = joined_data[[left_merge_column, 'year_total', rent_year]]
+
+        # Pass tabel to object param
+        self.reg_df_ = joined_data[[left_merge_column, 'year_total']]
+
+        for year in rent_year:
+            self.reg_df_ = pd.concat([self.reg_df_, joined_data[[year]]], axis=1)
 
         return self.reg_df_
 
@@ -138,8 +143,39 @@ class AllDataFrameInOne:
         self.borough_sum_df_ = df_final
         return df_final
 
+    def join_all_year(self, is_change=True):
+        """
+        This should only be applied after self.join_all_text(...)
+        col_year="YearMonth"
+        """
+
+        borough_year_df = self.borough_sum_df_
+        borough_year_df['Year'] = borough_year_df['YearMonth'].astype(int) // 100
+        borough_year_df = borough_year_df.groupby('Year').sum()
+        borough_year_df = borough_year_df.drop(columns=['YearMonth'])
+
+        if is_change:
+            self.borough_sum_df_ = borough_year_df
+
+        return borough_year_df
+
     def print_column_names(self):
         print(self._right_independent_df_.columns)
         print("____")
         print(self._left_independent_df_.columns)
 
+    def plot_stack_sum(self, x_: str, y_: str, title='Stacked Bar Chart of Values by Year for Each City'):
+        from matplotlib import pyplot as plt
+
+        # Plotting the stacked bar chart
+        self.borough_sum_df_ .plot(kind='bar', stacked=True, figsize=(15, 8))
+
+        # Setting the labels and title
+        plt.xlabel(x_)
+        plt.ylabel(y_)
+        plt.title('Stacked Bar Chart')
+        plt.legend(title=title, bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+
+        # Show the plot
+        plt.show()

@@ -149,3 +149,4 @@ def plot_bar_chart(df_, borough: str, col_year='YearMonth'):
     plt.ylabel('Values')
     plt.xticks(rotation=45)  # Rotating x-axis labels for better readability
     plt.show()
+
