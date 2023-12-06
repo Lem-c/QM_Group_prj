@@ -110,13 +110,14 @@ class AllDataFrameInOne:
         self.reg_df_ = merged_data
         return self.reg_df_
 
-    def join_all_text(self, columns_str: list, pivot_tar: str, val_col_name: str):
+    def join_all_text(self, columns_str: list, pivot_tar: str, val_col_name: str, side='left'):
         """
         Add all crimes together for analysis
         Example usage:
             join_all_crime(["MajorText", "MinorText", "LookUp_BoroughName"],
                             "LookUp_BoroughName",
                             "CrimeCount")
+        :param side: _left_independent_df_ or _right_independent_df_
         :param columns_str: The list no null contains columns with string type data
         :param pivot_tar: The column that going to be applied pivot
         :param val_col_name: New column name after melting and indexing
@@ -125,13 +126,22 @@ class AllDataFrameInOne:
 
         current_columns = columns_str
 
-        # Melting the dataframe to transform the years columns
-        df_melted = self._left_independent_df_.melt(id_vars=current_columns,
-                                                    var_name="YearMonth",
-                                                    value_name=val_col_name)
+        if side == 'left':
+            # Melting the dataframe to transform the years columns
+            df_melted = self._left_independent_df_.melt(id_vars=current_columns,
+                                                        var_name="YearMonth",
+                                                        value_name=val_col_name)
+        else:
+            df_melted = self._right_independent_df_.melt(id_vars=current_columns,
+                                                         var_name="YearMonth",
+                                                         value_name=val_col_name)
+
         if pivot_tar in columns_str:
             current_columns.remove(pivot_tar)
         current_columns.append("YearMonth")
+
+        # Convert val_col_name to numeric, coercing errors
+        df_melted[val_col_name] = pd.to_numeric(df_melted[val_col_name], errors='coerce')
 
         # Pivoting the dataframe to make 'LookUp_BoroughName' as column headers
         df_pivoted = df_melted.pivot_table(index=current_columns,
@@ -154,11 +164,20 @@ class AllDataFrameInOne:
         borough_year_df = self.borough_sum_df_
         borough_year_df['YearMonth'] = self.borough_sum_df_['YearMonth'].astype(int) // 100
         borough_year_df = borough_year_df.groupby('YearMonth').sum().reset_index()
+        borough_year_df['London'] = borough_year_df.drop(columns=['YearMonth']).sum(axis=1)
+
+        # Calculating the ratio of each area column value to the 'London' column value
+        area_columns = borough_year_df.columns[2:-1]  # All area columns except the 'London' column
+        ratios = borough_year_df[area_columns].div(borough_year_df['London'], axis=0)
+
+        # Adding the YearMonth column to the ratio dataframe for reference
+        ratios.insert(0, 'YearMonth', borough_year_df['YearMonth'])
 
         if is_change:
-            self.borough_sum_df_ = borough_year_df
+            self.borough_sum_df_ = ratios
 
-        return borough_year_df
+        # return borough_year_df -> is not ratio value table
+        return ratios
 
     def print_column_names(self):
         print(self._right_independent_df_.columns)
