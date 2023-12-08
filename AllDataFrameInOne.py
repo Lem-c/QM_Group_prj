@@ -140,6 +140,7 @@ class AllDataFrameInOne:
             current_columns.remove(pivot_tar)
         current_columns.append("YearMonth")
 
+        df_melted['YearMonth'] = df_melted['YearMonth'].str.split('-').str[0]
         # Convert val_col_name to numeric, coercing errors
         df_melted[val_col_name] = pd.to_numeric(df_melted[val_col_name], errors='coerce')
 
@@ -199,3 +200,6 @@ class AllDataFrameInOne:
 
         # Show the plot
         plt.show()
+
+    def print_all(self):
+        print(self.borough_sum_df_)

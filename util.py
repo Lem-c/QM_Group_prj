@@ -67,7 +67,7 @@ def plot_all_reg(points_x, points_y, X_test, y_prediction):
 
 def plot_scatter(df_, col_x: str, col_y: str,
                  title="Scatter Plot of x(Burglary) vs y(Rent)",
-                 x_axis="Burglary cases count", y_axis="Rent"):
+                 x_axis="Burglary happened rate", y_axis="Rent"):
     # Create a scatter plot
     plt.scatter(df_[col_x], df_[col_y], s=10)
 
