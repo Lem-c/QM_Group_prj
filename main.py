@@ -46,14 +46,14 @@ if __name__ == "__main__":
 
     # Step 2: Melt the DataFrame for each set of columns
     crime_melted = new_join.melt(id_vars=[col for col in new_join.columns if col not in crime_cols],
-                           value_vars=crime_cols,
-                           var_name='crime_category',
-                           value_name='crime')
+                                 value_vars=crime_cols,
+                                 var_name='crime_category',
+                                 value_name='crime')
 
     rent_melted = new_join.melt(id_vars=[col for col in new_join.columns if col not in rent_cols],
-                          value_vars=rent_cols,
-                          var_name='rent_category',
-                          value_name='rent')
+                                value_vars=rent_cols,
+                                var_name='rent_category',
+                                value_name='rent')
 
     crime_x = crime_melted['crime']
     rent_y = rent_melted['rent']
@@ -61,29 +61,89 @@ if __name__ == "__main__":
     # Combine the melted DataFrames
     # This step depends on how you want to combine them. If they share a common identifier, you can merge them
     # For example, if they share an 'id' column, you would merge like this:
-    combined_df = pd.DataFrame({"crime":crime_x, "rent":rent_y})
-    print(combined_df)
+    combined_df = pd.DataFrame({"crime": crime_x, "rent": rent_y})
+
+    rows_to_remove = []
+    # clean data
+    for index, row in combined_df.iterrows():
+        current_rent = float(row['rent'])
+        if current_rent < 1:
+            rows_to_remove.append(index)
+    combined_df.drop(rows_to_remove, inplace=True)
 
     util.plot_scatter(combined_df, 'crime', 'rent')
+    util.simple_linear_regression(combined_df, "crime", "rent", isPolynomial=False, polynomialDegree=1)
 
-    # # plot all borough line graph
-    # util.plot_crime_trend(crime_df.borough_sum_df_)
-    # # plot a borough cases in each month
-    # util.plot_bar_chart(crime_df.borough_sum_df_, "Barnet")
-    #
-    # # Simple linear
-    # crime_df.join_minor_tables('Burglary', 202001, ['2020-21'], minor_major='MajorText')
-    #
+    # Remove the unnamed index column
+    data_cleaned = combined_df.iloc[:, 0:2]
+    print(data_cleaned)
 
-    # reg_wb_green = smf.ols(formula='crime ~ rent', data=combined_df).fit()
-    # print(reg_wb_green.summary())
-    #
-    # util.plot_scatter(crime_df.reg_df_, 'year_total', '2020-21')
-    # util.simple_linear_regression(crime_df.reg_df_, 'year_total', '2020-21', isPolynomial=False, polynomialDegree=1)
-    util.simple_linear_regression(combined_df, 'crime', 'rent', isPolynomial=False, polynomialDegree=1)
-    #
-    # # Multi linear
-    # crime_df.join_multi_row(selected_major_crimes, 202001, '2020-21', text_column='MajorText')
-    # # crime_df.print_column_names()
-    # util.multi_linear_regression(crime_df.reg_df_, selected_major_crimes, '2020-21')
-    # util.stats_model(crime_df.reg_df_, selected_major_crimes, '2020-21')
+    # Check for missing values
+    missing_values = data_cleaned.isnull().sum()
+
+    # Check for duplicate entries
+    duplicate_entries = data_cleaned.duplicated().sum()
+
+    print(missing_values, duplicate_entries)
+
+    import matplotlib.pyplot as plt
+    import scipy.stats as stats
+
+
+# ---Create QQ plots for both 'crime' and 'rent' columns
+    plt.figure(figsize=(12, 6))
+
+    # QQ plot for 'crime'
+    plt.subplot(1, 2, 1)
+    stats.probplot(data_cleaned['crime'], dist="norm", plot=plt)
+    plt.title('QQ Plot for Crime Data')
+
+    # QQ plot for 'rent'
+    plt.subplot(1, 2, 2)
+    stats.probplot(data_cleaned['rent'], dist="norm", plot=plt)
+    plt.title('QQ Plot for Rent Data')
+
+    plt.tight_layout()
+    plt.show()
+
+# --------------------------------------------------------------------------
+    import statsmodels.api as sm
+
+    # Define the dependent and independent variables
+    X = data_cleaned['crime']  # Independent variable
+    y = data_cleaned['rent']  # Dependent variable
+
+    # Add a constant to the independent variable (for the intercept term)
+    X_with_constant = sm.add_constant(X)
+
+    # Fit a linear regression model
+    model = sm.OLS(y, X_with_constant).fit()
+
+    # Summary of the regression model
+    model_summary = model.summary()
+    print(model_summary)
+
+# -----------------------------------------------------------------------
+    from scipy import stats
+
+    # Extract the residuals
+    residuals = model.resid
+
+    # Normality test on the residuals (using the Jarque-Bera test)
+    jb_test = stats.jarque_bera(residuals)
+
+    # Homoscedasticity test (using the Breusch-Pagan test)
+    bp_test = sm.stats.diagnostic.het_breuschpagan(residuals, X_with_constant)
+
+    # Plotting residuals to visually inspect for homoscedasticity
+    plt.figure(figsize=(10, 6))
+    plt.scatter(X, residuals)
+    plt.axhline(y=0, color='r', linestyle='--')
+    plt.xlabel('Crime Rate')
+    plt.ylabel('Residuals')
+    plt.title('Residuals vs Crime Rate')
+    plt.show()
+
+    print(jb_test)
+    print(bp_test)
+

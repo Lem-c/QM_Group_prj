@@ -88,7 +88,7 @@ def simple_linear_regression(df_, col_X: str, col_y: str, isPolynomial=False, po
     df_X = df_[[col_X]].to_numpy()
     df_y = df_[col_y].to_numpy()
 
-    X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.2, train_size=0.8, random_state=2023)
+    X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.3, train_size=0.7, random_state=2023)
 
     if isPolynomial:
         # Reshaping data for the model
