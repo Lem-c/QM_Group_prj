@@ -22,6 +22,7 @@ if __name__ == "__main__":
     crime_df.join_all_text(["MajorText", "MinorText", "LookUp_BoroughName"],
                            "LookUp_BoroughName",
                            "CrimeCount", side='left')
+    print(crime_df.borough_sum_df_)
     crime_df.join_all_together(is_change=True)
 
     borough = crime_df.borough_sum_df_
@@ -70,6 +71,18 @@ if __name__ == "__main__":
         if current_rent < 1:
             rows_to_remove.append(index)
     combined_df.drop(rows_to_remove, inplace=True)
+
+    # cols_to_remove = set()
+    # # clean data
+    # for index, col in rent.iterrows():
+    #     for col_name, col_val in col.items():
+    #         print(col_val)
+    #         if float(col_val) - 1 < 1:
+    #             cols_to_remove.add(col_name)
+    #
+    # rent.drop(columns=cols_to_remove, inplace=True)
+    #
+    # util.plot_crime_trend(rent)
 
     util.plot_scatter(combined_df, 'crime', 'rent')
     util.simple_linear_regression(combined_df, "crime", "rent", isPolynomial=False, polynomialDegree=1)

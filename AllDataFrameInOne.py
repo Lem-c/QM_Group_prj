@@ -110,27 +110,34 @@ class AllDataFrameInOne:
         self.reg_df_ = merged_data
         return self.reg_df_
 
-    def join_all_text(self, columns_str: list, pivot_tar: str, val_col_name: str, side='left'):
+    def join_all_text(self, columns_str: list, pivot_tar: str, val_col_name: str, side='left',
+                      main_text='MinorText', crime_type='Burglary'):
         """
         Add all crimes together for analysis
         Example usage:
             join_all_crime(["MajorText", "MinorText", "LookUp_BoroughName"],
                             "LookUp_BoroughName",
                             "CrimeCount")
+
         :param side: _left_independent_df_ or _right_independent_df_
         :param columns_str: The list no null contains columns with string type data
         :param pivot_tar: The column that going to be applied pivot
         :param val_col_name: New column name after melting and indexing
         :return: new table saves all borough names as column name
+        :param crime_type: What type of crime
+        :param main_text: The crime column
         """
 
         current_columns = columns_str
 
         if side == 'left':
             # Melting the dataframe to transform the years columns
+            # df_melted = self.filter_case(crime_type, main_text).melt(id_vars=current_columns,
+            #                                                          var_name="YearMonth",
+            #                                                          value_name=val_col_name)
             df_melted = self._left_independent_df_.melt(id_vars=current_columns,
-                                                        var_name="YearMonth",
-                                                        value_name=val_col_name)
+                                                                     var_name="YearMonth",
+                                                                     value_name=val_col_name)
         else:
             df_melted = self._right_independent_df_.melt(id_vars=current_columns,
                                                          var_name="YearMonth",
