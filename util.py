@@ -154,6 +154,20 @@ def stats_model(df, crime_list: list, col_y: str):
     plt.show()
 
 
+def remove_outliers_iqr(df, col_1: str, col_2: str):
+    """
+    Remove outliers using Inter-quartile Range (IQR)
+    """
+    Q1 = df[[col_1, col_2]].quantile(0.25)
+    Q3 = df[[col_1, col_2]].quantile(0.75)
+    IQR = Q3 - Q1
+
+    outlier_condition = ((df[[col_1, col_2]] < (Q1 - 1.5 * IQR)) |
+                         (df[[col_1, col_2]] > (
+                                     Q3 + 1.5 * IQR))).any(axis=1)
+    return df[~outlier_condition]
+
+
 def sum_table_by_year(df_, col_year="YearMonth"):
     """
     Can only be used after pivoted by year

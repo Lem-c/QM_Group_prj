@@ -72,6 +72,8 @@ if __name__ == "__main__":
             rows_to_remove.append(index)
     combined_df.drop(rows_to_remove, inplace=True)
 
+    combined_df = util.remove_outliers_iqr(combined_df, 'crime', 'rent')
+
     # cols_to_remove = set()
     # # clean data
     # for index, col in rent.iterrows():
