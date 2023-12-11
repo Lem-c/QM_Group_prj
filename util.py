@@ -141,11 +141,13 @@ def stats_model(df, crime_list: list, col_y: str):
     cleaned_data = df.dropna()
 
     # Defining the independent X and dependent y variables
-    X = cleaned_data[crime_list].to_numpy()
+    # X = cleaned_data[crime_list].to_numpy()
     y = cleaned_data[col_y].to_numpy()
 
     # Assuming `X` is a DataFrame with multiple columns and `y` is the target series
-    model = sm.OLS(y, sm.add_constant(X)).fit()
+
+    model = sm.OLS(y, sm.add_constant(cleaned_data[crime_list].to_numpy())).fit()
+    print(model.summary())
 
     # Specify the number of columns in the grid
     fig = plt.figure(figsize=(8, 6))

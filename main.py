@@ -12,7 +12,7 @@ import statsmodels
 crime_data_url = "./data/MPS Borough Level Crime (Historical).csv"
 rent_data_url = "./data/local-authority-rents-borough.xlsx"
 selected_minor_crimes = ['Theft from Person', 'Rape', 'Historical Fraud and Forgery']
-selected_major_crimes = ['Robbery', 'Possession of Weapons', 'Theft']
+selected_major_crimes = ['Burglary', 'Possession of Weapons', 'Theft']
 
 if __name__ == "__main__":
     crime_df = myDF.AllDataFrameInOne(rent_data_url, crime_data_url)
@@ -89,6 +89,10 @@ if __name__ == "__main__":
     util.plot_scatter(combined_df, 'crime', 'rent')
     util.simple_linear_regression(combined_df, "crime", "rent", isPolynomial=False, polynomialDegree=1)
 
+    crime_df.join_multi_row(selected_major_crimes, 201901, '2019-20', text_column="MajorText")
+    util.stats_model(crime_df.reg_df_, selected_major_crimes, '2019-20')
+
+    exit(0)
     # Remove the unnamed index column
     data_cleaned = combined_df.iloc[:, 0:2]
     print(data_cleaned)
